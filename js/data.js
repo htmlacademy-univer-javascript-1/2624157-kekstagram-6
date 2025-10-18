@@ -72,6 +72,7 @@ const createUsers = () => ({
   comments: Array.from({length: generateCountComments()}, createComments), //массив комментариев
 });
 
+
 const similarUsers = () => Array.from({length: SIMILAR_USERS_COUNT}, createUsers);//Создание массива из пользователей
 
 export {similarUsers};
