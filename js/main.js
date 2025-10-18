@@ -1,7 +1,8 @@
-console.log('Testing');
+//console.log('Testing');
+
+/*
 import {zadanie1, zadanie2} from './functions.js';
 import {similarUsers} from './data.js';
-//import { similarUsers } from './data.js';
 
 const zad1 = zadanie1();
 const zad2 = zadanie2();
@@ -17,3 +18,4 @@ console.log(zad2.test3.result);
 console.log(zad2.test4.result);
 console.log('\nЗадание 4');
 console.log(zad4);
+*/
