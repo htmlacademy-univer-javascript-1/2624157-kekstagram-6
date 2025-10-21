@@ -3,6 +3,7 @@ console.log('Testing');
 import {zadanie1, zadanie2, getControlTime} from './functions.js';
 import {similarUsers} from './data.js';
 import { visual } from './visualizacia.js';
+import { initFullscreenViewer } from './fullscreen-viewer.js';
 
 const zad1 = zadanie1();
 const zad2 = zadanie2();
@@ -37,3 +38,7 @@ console.log(getControlTime('8:00', '17:30', '08:00', 900)); // false
 console.log('\nЗадание 7 - 1');
 console.log('Отображение фотографий');
 visual(zad4);
+
+console.log('\nЗадание 8 - 1');
+console.log('Полноэкранный просмотр инициализирован');
+initFullscreenViewer();
