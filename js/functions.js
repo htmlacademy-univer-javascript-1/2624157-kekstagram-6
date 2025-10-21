@@ -1,5 +1,5 @@
 
-export function getLengthString(str, length) {
+function getLengthString(str, length) {
   return str.length <= length;
 }
 
