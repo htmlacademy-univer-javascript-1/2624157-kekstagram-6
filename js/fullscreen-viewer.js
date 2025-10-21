@@ -12,6 +12,9 @@ const socialLikes = bigPicture.querySelector('.social__likes');
 const authorAvatar = bigPicture.querySelector('.social__header .social__picture');
 
 let currentPhotoData = null;
+let commentsToShow = [];
+let commentsShown = 0;
+const COMMENTS_PER_PORTION = 5;
 
 // Функция для создания DOM-элемента комментария
 const createCommentElement = (comment) => {
@@ -27,16 +30,32 @@ const createCommentElement = (comment) => {
 };
 
 // Функция для отрисовки комментариев
-const renderComments = (comments) => {
-  socialComments.innerHTML = '';
+const renderComments = () => {
+  const commentsPortion = commentsToShow.slice(commentsShown, commentsShown + COMMENTS_PER_PORTION);
   const fragment = document.createDocumentFragment();
 
-  comments.forEach((comment) => {
+  commentsPortion.forEach((comment) => {
     const commentElement = createCommentElement(comment);
     fragment.appendChild(commentElement);
   });
 
   socialComments.appendChild(fragment);
+  commentsShown += commentsPortion.length;
+
+  // Обновляем счетчик комментариев
+  commentCountElement.innerHTML = `${commentsShown} из <span class="comments-count">${commentsToShow.length}</span> комментариев`;
+
+  // Скрываем кнопку, если все комментарии показаны
+  if (commentsShown >= commentsToShow.length) {
+    commentsLoader.classList.add('hidden');
+  } else {
+    commentsLoader.classList.remove('hidden');
+  }
+};
+
+// Функция для загрузки следующей порции комментариев
+const loadMoreComments = () => {
+  renderComments();
 };
 
 // Функция для добавления/удаления лайка
@@ -85,6 +104,10 @@ const updateThumbnailLike = (photoId, likesCount, isLiked) => {
 const openFullscreen = (photoData) => {
   currentPhotoData = photoData;
 
+  // Инициализация переменных для комментариев
+  commentsToShow = [...photoData.comments];
+  commentsShown = 0;
+
   // Заполняем данные
   bigPictureImg.src = photoData.url;
   bigPictureImg.alt = photoData.description;
@@ -111,12 +134,15 @@ const openFullscreen = (photoData) => {
     socialLikes.classList.remove('social__likes--active');
   }
 
-  // Отрисовываем комментарии
-  renderComments(photoData.comments);
+  // Очищаем список комментариев
+  socialComments.innerHTML = '';
 
-  // Скрываем блоки счётчика комментариев и загрузки новых комментариев
-  commentCountElement.classList.add('hidden');
-  commentsLoader.classList.add('hidden');
+  // Показываем блоки счётчика комментариев и загрузки новых комментариев
+  commentCountElement.classList.remove('hidden');
+  commentsLoader.classList.remove('hidden');
+
+  // Отрисовываем первую порцию комментариев
+  renderComments();
 
   // Показываем окно
   bigPicture.classList.remove('hidden');
@@ -130,6 +156,8 @@ const closeFullscreen = () => {
   bigPicture.classList.add('hidden');
   document.body.classList.remove('modal-open');
   currentPhotoData = null;
+  commentsToShow = [];
+  commentsShown = 0;
 };
 
 // Обработчик закрытия по клику на кнопку
@@ -148,6 +176,11 @@ document.addEventListener('keydown', (evt) => {
 // Обработчик клика на лайк
 socialLikes.addEventListener('click', () => {
   toggleLike();
+});
+
+// Обработчик клика на кнопку "Загрузить ещё"
+commentsLoader.addEventListener('click', () => {
+  loadMoreComments();
 });
 
 // Функция для инициализации (добавляет обработчики клика на миниатюры)
