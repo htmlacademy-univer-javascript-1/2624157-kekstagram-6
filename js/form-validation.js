@@ -1,9 +1,6 @@
-// Исправляем импорт Pristine
 import './vendor/pristine/pristine.js';
 import { initImageScale, resetScale } from './image-scale.js';
-
-// Импортируем Pristine как обычный скрипт (через CDN или локально)
-// Временно отключим импорт, чтобы проверить работу
+import './vendor/nouislider/nouislider.js';
 
 const form = document.querySelector('.img-upload__form');
 const hashtagsInput = form.querySelector('.text__hashtags');
@@ -17,37 +14,49 @@ const effectsList = form.querySelector('.effects__list');
 const effectLevel = document.querySelector('.effect-level');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
+const scaleControl = document.querySelector('.scale__control--value'); // Добавляем элемент масштаба
 
 let isSubmitBlocked = false;
 let currentEffect = 'none';
+let slider = null;
 let pristine = null;
 
 // Настройки эффектов
 const effects = {
-  none: { min: 0, max: 100, step: 1 },
-  chrome: { filter: 'grayscale', min: 0, max: 1, step: 0.1 },
-  sepia: { filter: 'sepia', min: 0, max: 1, step: 0.1 },
+  none: { min: 0, max: 100, step: 1, filter: '', unit: '' },
+  chrome: { filter: 'grayscale', min: 0, max: 1, step: 0.1, unit: '' },
+  sepia: { filter: 'sepia', min: 0, max: 1, step: 0.1, unit: '' },
   marvin: { filter: 'invert', min: 0, max: 100, step: 1, unit: '%' },
   phobos: { filter: 'blur', min: 0, max: 3, step: 0.1, unit: 'px' },
-  heat: { filter: 'brightness', min: 1, max: 3, step: 0.1 }
+  heat: { filter: 'brightness', min: 1, max: 3, step: 0.1, unit: '' }
 };
 
-// Инициализация слайдера эффектов (нативный вариант)
+// Инициализация слайдера эффектов с noUiSlider
 const initEffectSlider = () => {
-  // Создаем нативный input range
-  effectLevelSlider.innerHTML = `
-    <input type="range"
-           class="effect-level__slider-native"
-           min="0"
-           max="100"
-           value="100"
-           step="1">
-  `;
+  // Скрываем слайдер по умолчанию
+  effectLevel.classList.add('hidden');
 
-  const nativeSlider = effectLevelSlider.querySelector('.effect-level__slider-native');
+  slider = noUiSlider.create(effectLevelSlider, {
+    range: {
+      min: 0,
+      max: 100
+    },
+    start: 100,
+    step: 1,
+    connect: 'lower',
+    format: {
+      to: function (value) {
+        return value;
+      },
+      from: function (value) {
+        return parseFloat(value);
+      }
+    }
+  });
 
-  nativeSlider.addEventListener('input', (evt) => {
-    const value = evt.target.value;
+  // Обработчик изменения значения слайдера
+  slider.on('update', (values) => {
+    const value = values[0];
     effectLevelValue.value = value;
     applyEffect(value);
   });
@@ -61,13 +70,13 @@ const applyEffect = (value) => {
   }
 
   const effect = effects[currentEffect];
-  let filterValue = value;
 
   // Преобразуем значение из диапазона 0-100 в нужный для эффекта
   const normalizedValue = (value / 100) * (effect.max - effect.min) + effect.min;
+  let filterValue;
 
   if (effect.unit) {
-    filterValue = normalizedValue + effect.unit;
+    filterValue = `${normalizedValue.toFixed(1)}${effect.unit}`;
   } else {
     filterValue = normalizedValue.toFixed(1);
   }
@@ -76,10 +85,19 @@ const applyEffect = (value) => {
 };
 
 // Обновление слайдера при смене эффекта
-const updateSliderForEffect = (effect) => {
-  const nativeSlider = effectLevelSlider.querySelector('.effect-level__slider-native');
-  if (nativeSlider) {
-    nativeSlider.value = 100; // Устанавливаем максимальное значение
+const updateSliderForEffect = (effectName) => {
+  if (slider) {
+    const effect = effects[effectName];
+
+    // Для эффектов кроме "none" показываем слайдер
+    if (effectName === 'none') {
+      effectLevel.classList.add('hidden');
+    } else {
+      effectLevel.classList.remove('hidden');
+    }
+
+    // Устанавливаем начальное значение
+    slider.set(100);
     applyEffect(100);
   }
 };
@@ -97,9 +115,8 @@ const resetEffects = () => {
   }
 
   // Сброс слайдера
-  const nativeSlider = effectLevelSlider.querySelector('.effect-level__slider-native');
-  if (nativeSlider) {
-    nativeSlider.value = 100;
+  if (slider) {
+    slider.set(100);
   }
 };
 
@@ -107,15 +124,7 @@ const resetEffects = () => {
 const onEffectChange = (evt) => {
   if (evt.target.name === 'effect') {
     currentEffect = evt.target.value;
-
-    if (currentEffect === 'none') {
-      effectLevel.classList.add('hidden');
-      previewImage.style.filter = 'none';
-    } else {
-      effectLevel.classList.remove('hidden');
-      const effect = effects[currentEffect];
-      updateSliderForEffect(effect);
-    }
+    updateSliderForEffect(currentEffect);
   }
 };
 
@@ -229,6 +238,19 @@ const onFormSubmit = async (evt) => {
   isSubmitBlocked = true;
   submitButton.disabled = true;
 
+  // Здесь будет код отправки формы на сервер
+  console.log('Форма отправлена');
+  console.log('Масштаб:', scaleControl.value);
+  console.log('Эффект:', currentEffect);
+  console.log('Уровень эффекта:', effectLevelValue.value);
+  console.log('Хэш-теги:', hashtagsInput.value);
+  console.log('Комментарий:', descriptionInput.value);
+
+  // Сброс блокировки (в реальном приложении после успешной отправки)
+  setTimeout(() => {
+    isSubmitBlocked = false;
+    submitButton.disabled = false;
+  }, 1000);
 };
 
 // Функция закрытия формы
