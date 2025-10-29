@@ -4,6 +4,8 @@ import {zadanie1, zadanie2, getControlTime} from './functions.js';
 import {similarUsers} from './data.js';
 import { visual } from './visualizacia.js';
 import { initFullscreenViewer } from './fullscreen-viewer.js';
+import { initFormValidation } from './form-validation.js';
+import { initImageScale } from './image-scale.js';
 
 const zad1 = zadanie1();
 const zad2 = zadanie2();
@@ -42,3 +44,9 @@ visual(zad4);
 console.log('\nЗадание 8 - 1');
 console.log('Полноэкранный просмотр инициализирован');
 initFullscreenViewer();
+
+console.log('\nЗадание 9 - 1');
+console.log('Валидация формы инициализирована');
+initFormValidation();
+console.log('\nМасштабирование изображения инициализировано');
+initImageScale();
