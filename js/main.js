@@ -5,7 +5,6 @@ import {similarUsers} from './data.js';
 import { visual } from './visualizacia.js';
 import { initFullscreenViewer } from './fullscreen-viewer.js';
 import { initFormValidation } from './form-validation.js';
-import { initImageScale } from './image-scale.js';
 
 const zad1 = zadanie1();
 const zad2 = zadanie2();
@@ -48,5 +47,3 @@ initFullscreenViewer();
 console.log('\nЗадание 9 - 1');
 console.log('Валидация формы инициализирована');
 initFormValidation();
-console.log('\nМасштабирование изображения инициализировано');
-initImageScale();
