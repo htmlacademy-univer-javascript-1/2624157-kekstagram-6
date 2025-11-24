@@ -1,6 +1,8 @@
 import './vendor/pristine/pristine.js';
 import { initImageScale, resetScale } from './image-scale.js';
 import './vendor/nouislider/nouislider.js';
+import { sendData } from './api.js';
+import { showSuccessMessage, showErrorMessage } from './messages.js';
 
 const form = document.querySelector('.img-upload__form');
 const hashtagsInput = form.querySelector('.text__hashtags');
@@ -14,7 +16,7 @@ const effectsList = form.querySelector('.effects__list');
 const effectLevel = document.querySelector('.effect-level');
 const effectLevelValue = document.querySelector('.effect-level__value');
 const effectLevelSlider = document.querySelector('.effect-level__slider');
-const scaleControl = document.querySelector('.scale__control--value'); // Добавляем элемент масштаба
+const scaleControl = document.querySelector('.scale__control--value');
 
 let isSubmitBlocked = false;
 let currentEffect = 'none';
@@ -120,6 +122,18 @@ const resetEffects = () => {
   }
 };
 
+const blockSubmitButton = () => {
+  isSubmitBlocked = true;
+  submitButton.disabled = true;
+  submitButton.textContent = 'Публикую...';
+};
+
+const unblockSubmitButton = () => {
+  isSubmitBlocked = false;
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
+};
+
 // Обработчик изменения эффекта
 const onEffectChange = (evt) => {
   if (evt.target.name === 'effect') {
@@ -220,6 +234,7 @@ const resetForm = () => {
   }
   resetScale();
   resetEffects();
+  fileInput.value = '';
 };
 
 // Обработчик отправки формы
@@ -235,22 +250,31 @@ const onFormSubmit = async (evt) => {
     return;
   }
 
-  isSubmitBlocked = true;
-  submitButton.disabled = true;
+  blockSubmitButton();
 
-  // Здесь будет код отправки формы на сервер
-  console.log('Форма отправлена');
-  console.log('Масштаб:', scaleControl.value);
-  console.log('Эффект:', currentEffect);
-  console.log('Уровень эффекта:', effectLevelValue.value);
-  console.log('Хэш-теги:', hashtagsInput.value);
-  console.log('Комментарий:', descriptionInput.value);
+  try {
+    // Собираем данные формы
+    const formData = new FormData(form);
 
-  // Сброс блокировки (в реальном приложении после успешной отправки)
-  setTimeout(() => {
-    isSubmitBlocked = false;
-    submitButton.disabled = false;
-  }, 1000);
+    // Добавляем данные об эффекте и масштабе
+    formData.append('scale', scaleControl.value);
+    formData.append('effect', currentEffect);
+    formData.append('effectLevel', effectLevelValue.value);
+
+    console.log('Отправка формы на сервер...');
+    await sendData(formData);
+
+    console.log('Форма успешно отправлена');
+    showSuccessMessage();
+    closeForm();
+    resetForm();
+
+  } catch (error) {
+    console.error('Ошибка отправки формы:', error);
+    showErrorMessage();
+  } finally {
+    unblockSubmitButton();
+  }
 };
 
 // Функция закрытия формы
