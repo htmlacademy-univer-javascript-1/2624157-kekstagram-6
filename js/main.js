@@ -117,8 +117,6 @@ const initApp = async () => {
   console.log('Валидация формы инициализирована');
   initFormValidation();
 
-  console.log('\nЗадание 12 - Фильтрация');
-  initFilters();
 };
 
 // Запуск приложения
