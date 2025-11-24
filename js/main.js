@@ -7,6 +7,7 @@ import { initFullscreenViewer } from './fullscreen-viewer.js';
 import { initFormValidation } from './form-validation.js';
 //import { showErrorMessage } from './messages.js';
 import { getData } from './api.js';
+import { initFilters } from './filters.js';
 
 // Функция для показа сообщения об ошибке загрузки
 const showLoadError = (message) => {
@@ -69,6 +70,9 @@ const loadAndDisplayPhotos = async () => {
     console.log('Отображение фотографий');
     visual(photosWithLikes);
 
+    //Инициализируем фильтры после загрузки данных
+    initFilters(photosWithLikes);
+
   } catch (error) {
     console.error('Ошибка загрузки:', error);
     showLoadError(error.message);
@@ -112,6 +116,9 @@ const initApp = async () => {
   console.log('\nЗадание 9 - 1');
   console.log('Валидация формы инициализирована');
   initFormValidation();
+
+  console.log('\nЗадание 12 - Фильтрация');
+  initFilters();
 };
 
 // Запуск приложения
