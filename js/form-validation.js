@@ -257,9 +257,9 @@ const onFormSubmit = async (evt) => {
     const formData = new FormData(form);
 
     // Добавляем данные об эффекте и масштабе
-    formData.append('scale', scaleControl.value);
-    formData.append('effect', currentEffect);
-    formData.append('effectLevel', effectLevelValue.value);
+    //formData.append('scale', scaleControl.value);
+    //formData.append('effect', currentEffect);
+    //formData.append('effectLevel', effectLevelValue.value);
 
     console.log('Отправка формы на сервер...');
     await sendData(formData);
@@ -283,10 +283,13 @@ const closeForm = () => {
   document.body.classList.remove('modal-open');
 };
 
-// Обработчик выбора файла
-const onFileInputChange = () => {
-  const file = fileInput.files[0];
-  if (file) {
+const showLoadError = (message) => {
+  alert(message);
+};
+
+// Функция для загрузки пользовательской фотографии
+const loadUserPhoto = (file) => {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onload = (e) => {
@@ -297,11 +300,55 @@ const onFileInputChange = () => {
       effectPreviews.forEach(preview => {
         preview.style.backgroundImage = `url(${e.target.result})`;
       });
+
+      resolve(e.target.result);
+    };
+
+    reader.onerror = () => {
+      reject(new Error('Ошибка загрузки файла'));
     };
 
     reader.readAsDataURL(file);
+  });
+};
+
+// Обработчик выбора файла
+const onFileInputChange = async () => {
+  const file = fileInput.files[0];
+  console.log('Выбран файл:', file); // ДЛЯ ОТЛАДКИ
+
+  if (!file) {
+    console.log('Файл не выбран'); // ДЛЯ ОТЛАДКИ
+    return;
+  }
+  // Проверяем тип файла
+  const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  if (!validTypes.includes(file.type)) {
+    showLoadError('Пожалуйста, выберите файл изображения (JPEG, PNG, GIF, WebP)');
+    fileInput.value = '';
+    return;
+  }
+
+  // Проверяем размер файла (например, не более 5MB)
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    showLoadError('Размер файла не должен превышать 5MB');
+    fileInput.value = '';
+    return;
+  }
+
+  try {
+    await loadUserPhoto(file);
     overlay.classList.remove('hidden');
     document.body.classList.add('modal-open');
+
+    // Сбрасываем масштаб и эффекты для новой фотографии
+    resetScale();
+    resetEffects();
+
+  } catch (error) {
+    console.error('Ошибка загрузки фотографии:', error);
+    showLoadError('Не удалось загрузить фотографию');
   }
 };
 
